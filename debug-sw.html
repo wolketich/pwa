@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Worker Debug</title>
+    <link rel="manifest" href="./manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Service Worker Debug</h1>
+    <div id="status"></div>
+    
+    <script>
+        function log(message, type = 'info') {
+            const status = document.getElementById('status');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            status.appendChild(div);
+            console.log(message);
+        }
+        
+        function logObject(obj, title) {
+            const status = document.getElementById('status');
+            const div = document.createElement('div');
+            div.className = 'status info';
+            div.innerHTML = `<strong>${title}:</strong><pre>${JSON.stringify(obj, null, 2)}</pre>`;
+            status.appendChild(div);
+        }
+        
+        // Show current URL info
+        log(`Current URL: ${window.location.href}`, 'info');
+        log(`Pathname: ${window.location.pathname}`, 'info');
+        log(`Origin: ${window.location.origin}`, 'info');
+        log(`Protocol: ${window.location.protocol}`, 'info');
+        
+        // Test Service Worker support
+        if ('serviceWorker' in navigator) {
+            log('✅ Service Worker is supported', 'success');
+        } else {
+            log('❌ Service Worker is not supported', 'error');
+        }
+        
+        // Test manifest
+        const manifestLink = document.querySelector('link[rel="manifest"]');
+        if (manifestLink) {
+            log(`✅ Manifest found: ${manifestLink.href}`, 'success');
+        } else {
+            log('❌ No manifest found', 'error');
+        }
+        
+        // Test HTTPS
+        if (window.location.protocol === 'https:') {
+            log('✅ HTTPS is enabled', 'success');
+        } else {
+            log('⚠️ Not HTTPS - Service Worker may not work', 'warning');
+        }
+        
+        // Test Service Worker registration
+        if ('serviceWorker' in navigator) {
+            const swPath = './sw.js';
+            const scope = './';
+            
+            log(`Attempting to register Service Worker...`, 'info');
+            log(`Path: ${swPath}`, 'info');
+            log(`Scope: ${scope}`, 'info');
+            
+            // First, check if sw.js exists
+            fetch(swPath)
+                .then(response => {
+                    if (response.ok) {
+                        log(`✅ Service Worker file found (${response.status})`, 'success');
+                    } else {
+                        log(`❌ Service Worker file not found (${response.status})`, 'error');
+                    }
+                })
+                .catch(error => {
+                    log(`❌ Error fetching Service Worker: ${error.message}`, 'error');
+                });
+            
+            // Try to register
+            navigator.serviceWorker.register(swPath, { scope })
+                .then((registration) => {
+                    log('✅ Service Worker registered successfully!', 'success');
+                    logObject(registration, 'Registration Object');
+                    log(`Scope: ${registration.scope}`, 'info');
+                    log(`Script URL: ${registration.scriptURL}`, 'info');
+                    log(`Active: ${registration.active ? 'Yes' : 'No'}`, 'info');
+                    log(`Installing: ${registration.installing ? 'Yes' : 'No'}`, 'info');
+                    log(`Waiting: ${registration.waiting ? 'Yes' : 'No'}`, 'info');
+                })
+                .catch((error) => {
+                    log(`❌ Service Worker registration failed: ${error.message}`, 'error');
+                    logObject(error, 'Error Object');
+                });
+        }
+        
+        // Check existing registrations
+        navigator.serviceWorker.getRegistrations()
+            .then(registrations => {
+                if (registrations.length > 0) {
+                    log(`Found ${registrations.length} existing Service Worker registration(s):`, 'info');
+                    registrations.forEach((reg, index) => {
+                        logObject(reg, `Registration ${index + 1}`);
+                    });
+                } else {
+                    log('No existing Service Worker registrations found', 'info');
+                }
+            })
+            .catch(error => {
+                log(`Error checking existing registrations: ${error.message}`, 'error');
+            });
+    </script>
+</body>
+</html> 
