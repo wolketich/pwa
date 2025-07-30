@@ -432,6 +432,7 @@ async function handleFile(file) {
         
         showResults(parsedData);
         showSuccess('EML file parsed successfully!');
+        collapseAllCards();
     } catch (error) {
         console.error('Parsing error:', error);
         showError(`Failed to parse EML file: ${error.message}`);
@@ -978,7 +979,6 @@ function loadSampleData() {
 // Initialize PWA when page loads
 document.addEventListener('DOMContentLoaded', () => {
     initializePWA();
-    collapseAllCards();
 });
 
 // Add CSS animation for slide-in notification
