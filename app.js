@@ -76,7 +76,16 @@ fileInput.addEventListener('change', (e) => {
 function initializePWA() {
     // Register service worker
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
+        // Get the current path to register service worker correctly
+        const swPath = window.location.pathname.endsWith('/') 
+            ? './sw.js' 
+            : '../sw.js';
+            
+        navigator.serviceWorker.register(swPath, {
+            scope: window.location.pathname.endsWith('/') 
+                ? './' 
+                : '../'
+        })
             .then((registration) => {
                 console.log('Service Worker registered successfully:', registration);
                 swRegistration = registration;

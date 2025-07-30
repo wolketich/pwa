@@ -4,11 +4,11 @@ const DYNAMIC_CACHE = 'dynamic-v1.0.0';
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/parser.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './app.js',
+  './parser.js',
+  './manifest.json'
 ];
 
 // Install event - cache static files
@@ -63,7 +63,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Handle different types of requests
-  if (url.pathname === '/' || url.pathname === '/index.html') {
+  if (url.pathname.endsWith('/') || url.pathname.endsWith('/index.html') || url.pathname.endsWith('/pwa/') || url.pathname.endsWith('/pwa/index.html')) {
     // Main page - serve from cache first, then network
     event.respondWith(
       caches.match(request)
@@ -84,10 +84,10 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => {
           // Fallback to offline page if both cache and network fail
-          return caches.match('/index.html');
+          return caches.match('./index.html');
         })
     );
-  } else if (STATIC_FILES.includes(url.pathname)) {
+  } else if (STATIC_FILES.some(file => url.pathname.endsWith(file.replace('./', '')))) {
     // Static files - serve from cache first
     event.respondWith(
       caches.match(request)
@@ -140,8 +140,8 @@ self.addEventListener('push', (event) => {
   
   const options = {
     body: 'Famly Parser is ready to use!',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
+    icon: './icons/icon-192x192.png',
+    badge: './icons/icon-72x72.png',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -151,12 +151,12 @@ self.addEventListener('push', (event) => {
       {
         action: 'explore',
         title: 'Open Parser',
-        icon: '/icons/icon-96x96.png'
+        icon: './icons/icon-96x96.png'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/icons/icon-96x96.png'
+        icon: './icons/icon-96x96.png'
       }
     ]
   };
@@ -174,7 +174,7 @@ self.addEventListener('notificationclick', (event) => {
 
   if (event.action === 'explore') {
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow('./')
     );
   }
 });
