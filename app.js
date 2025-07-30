@@ -978,6 +978,7 @@ function loadSampleData() {
 // Initialize PWA when page loads
 document.addEventListener('DOMContentLoaded', () => {
     initializePWA();
+    collapseAllCards();
 });
 
 // Add CSS animation for slide-in notification
